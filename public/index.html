@@ -153,6 +153,34 @@
       color: var(--accent-mint);
     }
 
+    /* Mobile Hamburger Button */
+    .nav-toggle {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .nav-toggle:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-mint);
+      color: var(--accent-mint);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -632,6 +660,56 @@
       .metrics-grid { grid-template-columns: repeat(2, 1fr); }
       .faq-grid { grid-template-columns: 1fr; }
       .hero h1 { font-size: 42px; }
+
+      .nav-toggle {
+        display: flex;
+      }
+
+      .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: rgba(18, 21, 32, 0.96);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 28px 32px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+        transform: translateY(-150%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 99;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .nav-links a {
+        font-size: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: block;
+      }
+
+      .nav-cta-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+        padding: 14px 20px;
+      }
     }
 
     @media (max-width: 600px) {
@@ -657,16 +735,24 @@
         <span>Malaria AI</span>
       </a>
 
-      <ul class="nav-links">
-        <li><a href="#how-it-works">How It Works</a></li>
-        <li><a href="#features">Clinical Features</a></li>
-        <li><a href="#pricing">Pricing & Plans</a></li>
-        <li><a href="#faq">FAQ</a></li>
-      </ul>
+      <!-- Mobile Hamburger Toggle Button -->
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars" id="toggle-icon"></i>
+      </button>
 
-      <a href="https://expo.dev/artifacts/eas/WBsJEB31hYYHfRC5UsZGH1nHZDhwmZ9pKiPHgh6Jgt0.apk" target="_blank" class="btn btn-primary">
-        <i class="fa-brands fa-android"></i> Download Field App
-      </a>
+      <!-- Nav Links & CTA Menu -->
+      <div class="nav-menu" id="nav-menu">
+        <ul class="nav-links">
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#features">Clinical Features</a></li>
+          <li><a href="#pricing">Pricing & Plans</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+
+        <a href="https://expo.dev/artifacts/eas/WBsJEB31hYYHfRC5UsZGH1nHZDhwmZ9pKiPHgh6Jgt0.apk" target="_blank" class="btn btn-primary nav-cta-btn">
+          <i class="fa-brands fa-android"></i> Download Field App
+        </a>
+      </div>
     </div>
   </nav>
 
@@ -959,6 +1045,25 @@
   </footer>
 
   <script>
+    // Mobile Nav Toggle Script
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    if (navToggle && navMenu) {
+      navToggle.addEventListener('click', () => {
+        const isOpen = navMenu.classList.toggle('open');
+        toggleIcon.className = isOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+      });
+
+      document.querySelectorAll('#nav-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('open');
+          toggleIcon.className = 'fa-solid fa-bars';
+        });
+      });
+    }
+
     // Live Server Health Monitor Script
     async function checkHealth() {
       try {
