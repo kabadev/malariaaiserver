@@ -4,6 +4,7 @@ import helmet from "helmet";
 import compression from "compression";
 import mongoose from "mongoose";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth";
 import diagnosisRoutes from "./routes/diagnoses";
@@ -26,7 +27,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(rateLimiter);
 
 // ── Serve Static Landing Page ─────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, "../public")));
+const publicDir = path.join(__dirname, "../public");
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+}
 
 app.use((req, _res, next) => {
   logger.debug(`${req.method} ${req.path}`);
@@ -35,7 +39,16 @@ app.use((req, _res, next) => {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "../public/index.html"));
+  const indexPath = path.join(__dirname, "../public/index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.json({
+      name: "Malaria AI Field Diagnostic System API",
+      status: "online",
+      healthCheck: "/health",
+    });
+  }
 });
 
 app.use("/api/auth", authRoutes);

@@ -23,8 +23,9 @@ ENV PORT=3000
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Copy compiled JavaScript output from builder stage
+# Copy compiled JavaScript output and public assets from builder stage
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 
 # Create uploads directory if needed
 RUN mkdir -p uploads
