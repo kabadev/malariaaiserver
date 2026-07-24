@@ -72,11 +72,13 @@ export async function syncDiagnoses(req: any, res: Response): Promise<void> {
 }
 
 // ── GET /api/diagnoses ─────────────────────────────────────────────────────
-export async function getDiagnoses(req: Request, res: Response): Promise<void> {
+export async function getDiagnoses(req: any, res: Response): Promise<void> {
   try {
+    const userId = req.userId || (req.query.userId as string);
     const { startDate, endDate, district, isPositive, page = '1', limit = '100' } = req.query as Record<string, string>;
 
     const query: any = {};
+    if (userId) query.userId = userId;
     if (startDate || endDate) {
       query.timestamp = {};
       if (startDate) query.timestamp.$gte = parseInt(startDate);
@@ -99,24 +101,31 @@ export async function getDiagnoses(req: Request, res: Response): Promise<void> {
 }
 
 // ── GET /api/diagnoses/stats ───────────────────────────────────────────────
-export async function getStats(req: Request, res: Response): Promise<void> {
+export async function getStats(req: any, res: Response): Promise<void> {
   try {
+    const userId = req.userId || (req.query.userId as string);
     const { days = '30' } = req.query as Record<string, string>;
     const since = Date.now() - parseInt(days) * 86_400_000;
 
+    const baseFilter: any = { timestamp: { $gte: since } };
+    if (userId) baseFilter.userId = userId;
+
+    const positiveFilter: any = { timestamp: { $gte: since }, isPositive: true };
+    if (userId) positiveFilter.userId = userId;
+
     const [totalCases, positiveCases, byDistrict, daily] = await Promise.all([
-      Diagnosis.countDocuments({ timestamp: { $gte: since } }),
-      Diagnosis.countDocuments({ timestamp: { $gte: since }, isPositive: true }),
+      Diagnosis.countDocuments(baseFilter),
+      Diagnosis.countDocuments(positiveFilter),
 
       Diagnosis.aggregate([
-        { $match: { timestamp: { $gte: since }, isPositive: true } },
+        { $match: positiveFilter },
         { $group: { _id: '$location.district', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 10 },
       ]),
 
       Diagnosis.aggregate([
-        { $match: { timestamp: { $gte: since } } },
+        { $match: baseFilter },
         {
           $group: {
             _id: { $dateToString: { format: '%Y-%m-%d', date: { $toDate: '$timestamp' } } },
@@ -130,6 +139,9 @@ export async function getStats(req: Request, res: Response): Promise<void> {
 
     const positivityRate = totalCases > 0 ? (positiveCases / totalCases) * 100 : 0;
 
+    const last24hFilter: any = { isPositive: true, timestamp: { $gte: Date.now() - 86_400_000 } };
+    if (userId) last24hFilter.userId = userId;
+
     res.json({
       days: parseInt(days),
       totalCases,
@@ -138,10 +150,7 @@ export async function getStats(req: Request, res: Response): Promise<void> {
       positivityRate: parseFloat(positivityRate.toFixed(1)),
       byDistrict,
       daily,
-      last24hPositive: await Diagnosis.countDocuments({
-        isPositive: true,
-        timestamp: { $gte: Date.now() - 86_400_000 },
-      }),
+      last24hPositive: await Diagnosis.countDocuments(last24hFilter),
     });
   } catch (err) {
     logger.error('getStats error', err);
