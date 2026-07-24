@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import mongoose from "mongoose";
+import path from "path";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth";
 import diagnosisRoutes from "./routes/diagnoses";
@@ -18,11 +19,14 @@ dotenv.config();
 const app = express();
 
 // ── Middleware ────────────────────────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false })); // Allow external fonts/styles for landing page
 app.use(cors({ origin: "*" })); // tighten in production
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(rateLimiter);
+
+// ── Serve Static Landing Page ─────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.use((req, _res, next) => {
   logger.debug(`${req.method} ${req.path}`);
@@ -30,6 +34,10 @@ app.use((req, _res, next) => {
 });
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/diagnoses", diagnosisRoutes);
 app.use("/api/devices", deviceRoutes);

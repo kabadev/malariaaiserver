@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malaria AI — Field Diagnostic & Epidemiological Surveillance Platform</title>
+  <meta name="description" content="On-Device Edge AI Microscopic Malaria Classification and Regional Outbreak Monitoring System." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg-dark: #090b10;
+      --bg-card: #121520;
+      --bg-card-hover: #191d2c;
+      --border-color: #212638;
+      --accent-mint: #07dfa6;
+      --accent-mint-dim: rgba(7, 223, 166, 0.12);
+      --accent-mint-glow: rgba(7, 223, 166, 0.35);
+      --accent-blue: #4f63f6;
+      --accent-danger: #e0566e;
+      --text-main: #ffffff;
+      --text-muted: #949db3;
+      --text-faint: #60687d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Ambient Background Glow */
+    .glow-sphere-1 {
+      position: absolute;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(7, 223, 166, 0.15) 0%, rgba(79, 99, 246, 0.08) 40%, rgba(9, 11, 16, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-sphere-2 {
+      position: absolute;
+      top: 900px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(79, 99, 246, 0.12) 0%, rgba(9, 11, 16, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navigation */
+    nav {
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      background: rgba(9, 11, 16, 0.85);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-mint), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #04261c;
+      font-size: 20px;
+      box-shadow: 0 0 20px var(--accent-mint-glow);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-mint);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-mint);
+      color: #04261c;
+      box-shadow: 0 4px 20px var(--accent-mint-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(7, 223, 166, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-mint);
+      transform: translateY(-2px);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 90px 0 60px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 30px;
+      background: var(--accent-mint-dim);
+      border: 1px solid rgba(7, 223, 166, 0.3);
+      color: var(--accent-mint);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      background: linear-gradient(180deg, #ffffff 0%, #b0b9d0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 50px;
+    }
+
+    /* Live System Status Widget */
+    .status-widget {
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px 28px;
+      border-radius: 50px;
+      margin-bottom: 60px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-mint);
+      box-shadow: 0 0 10px var(--accent-mint);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Metrics Bar */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 100px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-mint);
+    }
+
+    .metric-value {
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--accent-mint);
+      font-family: 'Outfit', sans-serif;
+      margin-bottom: 4px;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Features Grid */
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title h2 {
+      font-size: 38px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 120px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(7, 223, 166, 0.4);
+      transform: translateY(-6px);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--accent-mint-dim);
+      border: 1px solid rgba(7, 223, 166, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-mint);
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* API Documentation Showcase */
+    .api-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 28px;
+      padding: 40px;
+      margin-bottom: 120px;
+    }
+
+    .code-window {
+      background: #06070a;
+      border: 1px solid #1a1e2b;
+      border-radius: 16px;
+      padding: 24px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #a9b7d0;
+      overflow-x: auto;
+    }
+
+    .code-method { color: var(--accent-mint); font-weight: bold; }
+    .code-url { color: #ffffff; }
+    .code-key { color: var(--accent-blue); }
+    .code-string { color: #f2c94c; }
+
+    /* Download Banner */
+    .download-banner {
+      background: linear-gradient(135deg, rgba(7, 223, 166, 0.1), rgba(79, 99, 246, 0.15));
+      border: 1px solid var(--accent-mint);
+      border-radius: 28px;
+      padding: 60px 40px;
+      text-align: center;
+      margin-bottom: 100px;
+      position: relative;
+    }
+
+    .download-banner h2 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .download-banner p {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-faint);
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 40px; }
+    }
+
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 32px; }
+      .hero-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-sphere-1"></div>
+  <div class="glow-sphere-2"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-microscope"></i>
+        </div>
+        <span>Malaria AI</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#architecture">Edge AI</a></li>
+        <li><a href="#api">API Spec</a></li>
+        <li><a href="#status">Health Status</a></li>
+      </ul>
+
+      <a href="https://expo.dev/accounts/seysolution/projects/Malarial_AI/builds/b5fba0b5-4a90-4701-84b3-686d67941555" target="_blank" class="btn btn-primary">
+        <i class="fa-brands fa-android"></i> Get Android APK
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge">
+        <i class="fa-solid fa-shield-virus"></i> Edge TFLite AI Diagnostic Platform
+      </div>
+
+      <h1>On-Device Microscopic Cell Classification & Regional Epidemic Surveillance</h1>
+
+      <p>
+        Empowering frontline health workers in low-resource settings with instant offline AI microscopic blood smear diagnostic analysis, parasite density calculation, and 15-minute automated outbreak alerting.
+      </p>
+
+      <div class="hero-actions">
+        <a href="https://expo.dev/accounts/seysolution/projects/Malarial_AI/builds/b5fba0b5-4a90-4701-84b3-686d67941555" target="_blank" class="btn btn-primary">
+          <i class="fa-solid fa-download"></i> Download Field App (Android APK)
+        </a>
+        <a href="#api" class="btn btn-secondary">
+          <i class="fa-solid fa-code"></i> Explore Backend API
+        </a>
+      </div>
+
+      <!-- Live Health Status Bar -->
+      <div class="status-widget" id="status">
+        <div class="status-item">
+          <div class="pulse-dot"></div>
+          <span>API Status: <strong id="api-status" style="color: var(--accent-mint);">Checking...</strong></span>
+        </div>
+        <div class="status-item">
+          <i class="fa-solid fa-database" style="color: var(--accent-blue);"></i>
+          <span>MongoDB: <strong id="mongo-status">Connected</strong></span>
+        </div>
+        <div class="status-item">
+          <i class="fa-solid fa-clock"></i>
+          <span>Uptime: <strong id="uptime">Loading...</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Metrics -->
+  <section class="container">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">&lt; 150ms</div>
+        <div class="metric-label">On-Device Inference Speed</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">100%</div>
+        <div class="metric-label">Offline Capability</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">15 min</div>
+        <div class="metric-label">Outbreak Response Cycle</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">70x70</div>
+        <div class="metric-label">Tensor Resolution</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Platform Features -->
+  <section class="container" id="features">
+    <div class="section-title">
+      <h2>Engineered for Clinical Precision</h2>
+      <p>A end-to-end medical ecosystem connecting edge diagnostic devices to cloud surveillance</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <h3>On-Device TFLite Engine</h3>
+        <p>Runs TensorFlow Lite C++ binary models locally on phone hardware without needing an internet connection or cellular coverage.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-chart-line-up"></i>
+        </div>
+        <h3>Automated Outbreak Monitoring</h3>
+        <p>Backend scheduled engine continuously aggregates regional case densities every 15 minutes, triggering emergency SMS & Email alerts when thresholds are reached.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <h3>Scoped Patient Metadata</h3>
+        <p>Attaches patient name, age, gender, unique patient ID, and parasite counts (parasites/μL) to every diagnostic scan record.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-location-dot"></i>
+        </div>
+        <h3>Reverse Geocoding & Heatmaps</h3>
+        <p>Automatically maps exact GPS coordinates to regional health districts to generate high-resolution epidemiological density maps.</p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3>Multi-Tenant Data Privacy</h3>
+        <p>JWT-authenticated data architecture ensuring each account owner and clinic only views and manages their own patient records.</p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+        </div>
+        <h3>Smart Batch Sync</h3>
+        <p>Background sync queue stores diagnoses locally in SQLite when offline and syncs automatically once network connectivity is restored.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- API Documentation Showcase -->
+  <section class="container" id="api">
+    <div class="section-title">
+      <h2>Robust Backend API Service</h2>
+      <p>Production Express.js & MongoDB endpoints powering mobile field diagnostic sync</p>
+    </div>
+
+    <div class="api-section">
+      <div class="code-window">
+        <p><span class="code-method">POST</span> <span class="code-url">https://malariaapi.app.innovisal.com/api/auth/register</span></p>
+        <p><span class="code-method">POST</span> <span class="code-url">https://malariaapi.app.innovisal.com/api/auth/login</span></p>
+        <p><span class="code-method">POST</span> <span class="code-url">https://malariaapi.app.innovisal.com/api/auth/onboarding</span></p>
+        <p><span class="code-method">POST</span> <span class="code-url">https://malariaapi.app.innovisal.com/api/diagnoses/sync</span></p>
+        <p><span class="code-method">GET</span>  <span class="code-url">https://malariaapi.app.innovisal.com/api/diagnoses/stats?days=30</span></p>
+        <p><span class="code-method">GET</span>  <span class="code-url">https://malariaapi.app.innovisal.com/api/alerts</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Banner -->
+  <section class="container">
+    <div class="download-banner">
+      <h2>Ready to Deploy in the Field?</h2>
+      <p>Download the official Android APK to start performing AI malaria slide scans immediately.</p>
+      <a href="https://expo.dev/accounts/seysolution/projects/Malarial_AI/builds/b5fba0b5-4a90-4701-84b3-686d67941555" target="_blank" class="btn btn-primary">
+        <i class="fa-brands fa-android"></i> Download Android APK Build
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>© 2026 Innovisal Malaria AI Field Diagnostic System. Built for Health Clinics, Research Institutions, & Field Epidemiology.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Live Health Ping Script
+    async function checkHealth() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        if (data.status === 'ok') {
+          document.getElementById('api-status').innerText = 'Operational 🟢';
+          document.getElementById('mongo-status').innerText = data.mongodb === 'connected' ? 'Connected 🟢' : 'Disconnected 🔴';
+          const mins = Math.floor(data.uptimeSeconds / 60);
+          document.getElementById('uptime').innerText = `${mins} mins`;
+        }
+      } catch (err) {
+        document.getElementById('api-status').innerText = 'Offline 🔴';
+      }
+    }
+    checkHealth();
+    setInterval(checkHealth, 10000);
+  </script>
+</body>
+</html>
